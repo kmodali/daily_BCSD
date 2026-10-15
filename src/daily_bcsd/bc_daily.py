@@ -175,9 +175,13 @@ def _strip_bounds(da):
 
 def bc_daily(dhist, d21, dhistout, d21out, dobs, var, dec, ref_st, ref_end,
              min_lat, max_lat, min_lon, max_lon, pad=4, buff=15, chunk_lat=32, chunk_lon=32,
-             workers=None, overwrite=False):
-    """Bias-correct GCM file number ``dec``; returns the output path."""
-    netCDF4.set_chunk_cache(NC_CHUNK_CACHE)
+             workers=None, overwrite=False, nc_chunk_cache=NC_CHUNK_CACHE):
+    """Bias-correct GCM file number ``dec``; returns the output path.
+
+    ``nc_chunk_cache`` is the HDF5 chunk cache in bytes per variable and open
+    file; it is set process-wide before any file is opened.
+    """
+    netCDF4.set_chunk_cache(nc_chunk_cache)
     box = (min_lat, max_lat, min_lon, max_lon)
     chunks = {"time": -1, "lat": chunk_lat, "lon": chunk_lon}
     prcp = "tas" not in var
@@ -303,11 +307,14 @@ def main(argv=None):
     p.add_argument("--chunk-lon", type=int, default=32, help="tile size in lon (sets memory use)")
     p.add_argument("--workers", type=int, default=None, help="dask threads (default: all cores)")
     p.add_argument("--overwrite", action="store_true")
+    p.add_argument("--nc-cache-mb", type=float, default=NC_CHUNK_CACHE / 2**20,
+                   help="netCDF/HDF5 chunk cache per variable and open file, in MB")
     a = p.parse_args(argv)
     logging.basicConfig(level=logging.INFO, format="%(asctime)s %(message)s")
     bc_daily(a.dhist, a.d21, a.dhistout, a.d21out, a.dobs, a.var, a.dec, a.ref_st, a.ref_end,
              a.min_lat, a.max_lat, a.min_lon, a.max_lon, pad=a.pad, buff=a.buff,
-             chunk_lat=a.chunk_lat, chunk_lon=a.chunk_lon, workers=a.workers, overwrite=a.overwrite)
+             chunk_lat=a.chunk_lat, chunk_lon=a.chunk_lon, workers=a.workers, overwrite=a.overwrite,
+             nc_chunk_cache=int(a.nc_cache_mb * 2**20))
 
 
 if __name__ == "__main__":

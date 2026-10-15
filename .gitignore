@@ -1,0 +1,41 @@
+# --- Python ---
+__pycache__/
+*.py[cod]
+*.so
+*.egg-info/
+build/
+dist/
+
+# --- Environments (recreate with `uv sync`; uv.lock and .python-version ARE tracked) ---
+.venv/
+venv/
+.env
+
+# --- Test / tool caches ---
+.pytest_cache/
+.coverage
+.coverage.*
+htmlcov/
+.mypy_cache/
+.ruff_cache/
+.ipynb_checkpoints/
+
+# --- Data and run outputs (never commit climate data) ---
+*.nc
+*.nc4
+*.part
+*.grib
+*.grb
+*.zarr/
+dask-worker-space/
+
+# --- Logs (e.g. SLURM: bcsd_<job>_<task>.log, slurm-<job>.out) ---
+*.log
+slurm-*.out
+
+# --- Editors / OS ---
+.vscode/
+.idea/
+*.swp
+*~
+.DS_Store

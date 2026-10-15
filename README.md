@@ -17,7 +17,7 @@ See Thrasher, et al., 2012, (https://doi.org/10.5194/hess-16-3309-2012) and Thra
 | `SDDaily.ncl` | Original NCL spatial disaggregation (SD) step |
 | `src/daily_bcsd/` | Python port of the BC step (numpy + xarray + dask) |
 | `tests/` | Unit tests, an end-to-end test and an NCL comparison harness |
-| `bcFuncs.py`, `get1Dindex2.py`, `*.ipynb` | Earlier, incomplete translation attempts; superseded by `src/daily_bcsd/` |
+| `examples/` | Ready-to-edit run scripts: single file, all files, SLURM array, Python API, result check, numpy core |
 
 ## Python port of the BC step
 
@@ -88,6 +88,9 @@ bc_daily(dhist, d21, dhistout, d21out, dobs, "pr", 7, 1985, 2014,
          -60, 90, 0, 360, chunk_lat=32, chunk_lon=32, workers=4)
 ```
 
+More complete, tested scripts are in [`examples/`](examples/README.md): single file, all files,
+SLURM array, Python API, result check and the numpy core.
+
 To correct a full set of files, loop over `--dec`, for example in a SLURM array job:
 
 ```bash
@@ -120,6 +123,7 @@ uv run daily-bcsd ... --dec ${SLURM_ARRAY_TASK_ID}
 | `--chunk-lat N`, `--chunk-lon N` | 32, 32 | Tile size in grid points. Sets the memory per tile. |
 | `--workers N` | all cores | Number of tiles processed in parallel (dask threads). |
 | `--overwrite` | off | Recompute even if the output file exists. Without it, existing files are skipped. |
+| `--nc-cache-mb MB` | 4 | netCDF/HDF5 chunk cache per variable and per open file, set before any file is opened (see [Memory and performance](#memory-and-performance)). |
 
 ### Input requirements
 
@@ -160,6 +164,12 @@ Measured on Levante with a 160×200 grid (about 1.9 GB of pr input) and 32×40 t
 |---|---|
 | 1 | ~0.6 GB |
 | 4 | ~1.7 GB |
+
+**netCDF chunk cache.** Every open file keeps its own HDF5 chunk cache. netCDF's default is
+64 MB, which grows to several GB with dozens of input files, so the port lowers it to 4 MB.
+Each tile reads every HDF5 chunk only once, so a large cache rarely helps. If your files have
+large compressed chunks that several reads share, it can be raised with `--nc-cache-mb` (or
+`bc_daily(..., nc_chunk_cache=bytes)`). The cost is up to that size × the number of open files.
 
 One 1,280-point tile for one decade takes about 16 s. Larger tiles mean fewer, bigger reads.
 Very small tiles on files chunked per time step make each file be read many times over.
