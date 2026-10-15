@@ -1,0 +1,29 @@
+[project]
+name = "daily-bcsd"
+version = "0.1.0"
+description = "Daily BCSD bias correction: lazy xarray/dask port of BCDaily.ncl"
+readme = "README.md"
+authors = [
+    { name = "Kameswarrao Modali", email = "modali@dkrz.de" }
+]
+requires-python = ">=3.14"
+dependencies = [
+    "dask>=2026.8.0",
+    "flox>=0.11.2",
+    "ipykernel>=7.4.0",
+    "netcdf4>=1.7.4",
+    "numpy>=2.5.4",
+    "xarray>=2026.9.0",
+]
+
+[project.scripts]
+daily-bcsd = "daily_bcsd:main"
+
+[build-system]
+requires = ["uv_build>=0.12.19,<0.13.0"]
+build-backend = "uv_build"
+
+[dependency-groups]
+dev = [
+    "pytest>=9.1.1",
+]
